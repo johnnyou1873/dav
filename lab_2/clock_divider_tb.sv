@@ -25,7 +25,7 @@ module clock_divider_tb(
 		#20;
 		clock = 0;
 		speed = 20'd1000000;
-		speed = 20'd1;
+//		speed = 20'd1;
 		rst = 0;
 		#2000;
 		$stop;
