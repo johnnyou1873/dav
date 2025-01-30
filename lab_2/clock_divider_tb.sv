@@ -5,17 +5,16 @@
 
 module clock_divider_tb(
 	output logic clk,
-	output logic outClk
+	output logic clockOut
 );
 
 	logic clock;
 	logic [19:0] speed;
-	logic rst;
+	logic reset;
 	
-	clock_divider clock_divider (.clk(clock), .speed(speed), .rst(rst), .outClk(outClk));	
-//	clock_divider #(.BASE_SPEED(50)) clock_divider (.clk(clock), .speed(speed), .rst(rst), .outClk(outClk));	
+	clock_divider clock_divider (.clockIn(clock), .speed(speed), .reset(reset), .clockOut(clockOut));
+//	clock_divider #(.BASE_SPEED(50)) clock_divider (.clockIn(clock), .speed(speed), .reset(reset), .clockOut(clockOut));;
 
-	
 	always begin
 		#5 clock = ~clock;
 		clk = clock;
@@ -26,7 +25,7 @@ module clock_divider_tb(
 		clock = 0;
 		speed = 20'd1000000;
 //		speed = 20'd1;
-		rst = 0;
+		reset = 0;
 		#2000;
 		$stop;
 	end

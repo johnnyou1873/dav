@@ -1,24 +1,27 @@
 // slot.sv
-// you was here! 2024-12-04
+// You was here! 2025-01-29
+// I'm feeling lucky...
 
 module slot  #(
-	parameter SEED = 4'b0000
+	parameter SEED = 4'b1000
 )(
-	input clk,
-	input rst,
+	input clock,
+	input reset,
 	output logic [3:0] digit
 );
 	
-	always @(posedge clk) begin
-		if (rst) begin
-			digit <= SEED;
+	logic [3:0] counter = SEED;
+	
+	always @(posedge clock or posedge reset) begin
+		if (reset) begin
+			counter <= SEED;
 		end else begin
-			digit <= { digit[0] ^ digit[1], digit[3:1] };
+			counter <= { counter[0] ^ counter[1], counter[3:1] };
 		end
 	end
 	
-//	always_comb begin
-//
-//	end
+	always_comb begin
+		digit = counter;
+	end
 	
 endmodule
