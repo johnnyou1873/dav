@@ -13,11 +13,12 @@ clockDivider timingClock (.clockIn(clock), .speed(tempo), .reset(reset), .clockO
 
 /* 
   Never Gonna Give you Up
-  Connect a piezo buzzer or speaker to pin 11 or select a new pin.
+  Connect a piezo buzzer
   More songs available at https://github.com/robsoncouto/arduino-songs                                            
                                               
                                               Robson Couto, 2019
 */
+
 `define NOTE_B0  31
 `define NOTE_C1  33
 `define NOTE_CS1 35
@@ -120,6 +121,9 @@ int melody[`SONG_LENGTH] = '{
   // Never Gonna Give You Up - Rick Astley
   // Score available at https://musescore.com/chlorondria_5/never-gonna-give-you-up_alto-sax
   // Arranged by Chlorondria
+  
+  // Encoding: 4 -> quarter note, 8 -> 8th note, 16 -> 16th note
+  // -4 -> dotted quarter note, etc
 
 	`NOTE_D5,-4, `NOTE_E5,-4, `NOTE_A4,4, //1
 	`NOTE_E5,-4, `NOTE_FS5,-4, `NOTE_A5,16, `NOTE_G5,16, `NOTE_FS5,8,
