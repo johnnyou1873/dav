@@ -15,11 +15,11 @@ module slotMachine_top(
 	
 	logic [11:0] display;
 	logic [3:0] digits [0:2];
-	logic displayBlinkSpeed;
+	logic [19:0] displayBlinkSpeed;
 	logic buzzerDisable;
 
-	logic reset = 0;
-	logic startStop = 0;	
+	logic reset = 0; // Active high pulse
+	logic startStop = 0;	// Active high pulse
 	
 	clockDivider slotClockDivider [0:2] (.clockIn(slotClockIn), .speed(slotSpeed), .reset(reset), .clockOut(slotClock));
 	slot slot [0:2] (.clock(slotClock), .reset(reset), .digit(digits));
@@ -27,7 +27,8 @@ module slotMachine_top(
 	displayEncoder displayEncoder [0:2] (.digits(digits), .shutdown(displayClock), .displayBits(displayBits));
 	clockDivider displayClockDivider (.clockIn(clock), .speed(displayBlinkSpeed), .reset(reset), .clockOut(displayClock));
 	
-	clockDivider buzzerClockDivider (.clockIn(clock), .speed(440), .reset(buzzerDisable), .clockOut(buzzer));
+//	clockDivider buzzerClockDivider (.clockIn(clock), .speed(440), .reset(buzzerDisable), .clockOut(buzzer));
+	buzzerSong buzzerSong (.clock(clock), .reset(buzzerDisable), .buzzer(buzzer));
 	
 	 // State encoding
     typedef enum logic [1:0] {
@@ -37,17 +38,17 @@ module slotMachine_top(
         WIN  = 2'b11
     } state_t;
 	 
-	state_t currentState, nextState;
+	state_t currentState = SET, nextState = SET;
 	
 	always_comb begin
-//		slotSpeed[0] = 20'd5;
-//		slotSpeed[1] = 20'd1;
-//		slotSpeed[2] = 20'd2;
+		slotSpeed[0] = 20'd5;
+		slotSpeed[1] = 20'd1;
+		slotSpeed[2] = 20'd2;
 
 		// I'm no gambler...
-		slotSpeed[0] = 20'd5;
-		slotSpeed[1] = 20'd5\;
-		slotSpeed[2] = 20'd5;
+//		slotSpeed[0] = 20'd5;
+//		slotSpeed[1] = 20'd5;
+//		slotSpeed[2] = 20'd5;
 	
 		slotClockIn = (clock && (currentState == RUN));
 
@@ -67,10 +68,10 @@ module slotMachine_top(
 				if (reset) begin
 					nextState = SET;
 				end else if (startStop) begin
-					if (digits[0] != digits[1] || digits[1] != digits[2]) begin
-						nextState = STOP;
-					end else begin
+					if (digits[0] == digits[1] && digits[1] == digits[2]) begin
 						nextState = WIN;
+					end else begin
+						nextState = STOP;
 					end
 				end else begin
 					nextState = RUN;
@@ -88,7 +89,7 @@ module slotMachine_top(
 				end
 			end
 			WIN: begin  // Win (1,1)
-				displayBlinkSpeed = 20'd2;
+				displayBlinkSpeed = 20'd5;
 				buzzerDisable = 0;
 				if (reset) begin
 					nextState = SET;
@@ -101,8 +102,8 @@ module slotMachine_top(
 		endcase
 	end
 	
-	logic resetPrev;
-	logic startStopPrev;
+	logic resetPrev = 0;
+	logic startStopPrev = 0;
 
 	always @(posedge clock) begin
 		currentState <= nextState;
