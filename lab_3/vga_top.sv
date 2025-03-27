@@ -1,5 +1,5 @@
 module vga_top(
-	input clock,
+	input clk,
 	input button,
    output logic VGA_hsync,
 	output logic VGA_vsync,
@@ -8,7 +8,7 @@ module vga_top(
 	output logic [3:0] VGA_blue
 );
 
-	logic pllclock;
+	logic pllclk;
 	logic rst;
 	logic rstPrev;
 	
@@ -18,11 +18,17 @@ module vga_top(
 	
 	logic [9:0] hc;
 	logic [9:0] vc;
-	// clock gen
-	vgaclk vgaclk (.areset(rst), .inclk0(clock), .c0(pllclock), .locked());
-	// instantiate driver
-	vga vga (.vgaclk(pllclock), .rst(rst), .input_red(input_red), .input_green(input_green), .input_blue(input_blue), .hc_out(hc), .vc_out(vc), .hsync(VGA_hsync), .vsync(VGA_vsync), .red(VGA_red), .green(VGA_green), .blue(VGA_blue));
 	
+	logic [7:0] pixel_data_in;
+	logic [7:0] pixel_data_out;
+	logic [18:0] write_addr;
+	
+	// clock gen
+	vgaclk vgaclk (.areset(rst), .inclk0(clk), .c0(pllclk), .locked());
+	// instantiate driver
+	vga vga (.vgaclk(pllclk), .rst(rst), .input_red(input_red), .input_green(input_green), .input_blue(input_blue), .hc_out(hc), .vc_out(vc), .hsync(VGA_hsync), .vsync(VGA_vsync), .red(VGA_red), .green(VGA_green), .blue(VGA_blue));
+	// ping-pong buffer
+	doubleBuffer doubleBuffer (.clk(clk), .hc(hc), .vc(vc), .write_addr(write_addr), .pixel_data_in(pixel_data_in), .pixel_data_out(pixel_data_out));
 
 	localparam BLK = 8'h00;
 	localparam WHT = 8'hff;
@@ -74,18 +80,22 @@ module vga_top(
 	always_comb begin
 		// calc position when within active display area
 		if (hc < 640 && vc < 480) begin
-			input_red = test_sprite[(ypos * 32) + xpos][7:5];
-			input_blue = test_sprite[(ypos * 32) + xpos][1:0];
-			input_green = test_sprite[(ypos * 32) + xpos][4:2];
+			pixel_data_in = test_sprite[(ypos * 32) + xpos];
+			write_addr = ypos * 32 + xpos;
+			input_red = pixel_data_out[7:5];
+			input_blue = pixel_data_out[1:0];
+			input_green = pixel_data_out[4:2];
 		end else begin
 		// set don't care value for blanking period
+			pixel_data_in = test_sprite[0];
+			write_addr = 0;
 			input_red = 0;
 			input_green = 0;
 			input_blue = 0;
 		end
 	end
 	
-	always_ff @(posedge clock) begin
+	always_ff @(posedge clk) begin
 		rstPrev <= button;
 		rst <= !button && rstPrev;
 	end

@@ -2,7 +2,7 @@ module vga(
     // incoming clock signal - 25 MHz
 	input vgaclk,
     // incoming reset signal - driven by shift register in top level
-    input rst,
+   input rst,
 
 	// 8-bit color allocates 3 bits for red, 3 for green, 2 for blue
 	input [2:0] input_red,
