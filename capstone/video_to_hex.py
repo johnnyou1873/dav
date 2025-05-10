@@ -4,40 +4,55 @@ VIDEO TO HEX CONVERTER
    for use in a VGA controlled by an FPGA
 """
 import cv2
+import os
 
-# program vars
-
+# PROGRAM VARS
 # number of visible pixels per horizontal line: 640
 # number of visible horizontal lines per frame: 480
 # aspect ratio: 4:3
-video_path = ""     # path to directory of mp4 file
-num_frames = 0      # number of desired frames
+video_path = "bad_appleMV.mp4"     # path to directory of mp4 file
+num_frames = 10      # number of desired frames
 pix_width = 0       # number of pixels wide per frame 
 pix_height = 0      # number of pixels tall per frame 
 num_colors = 0      # number of colors over all frames
 
-vidcap = cv2.VideoCapture(video_path)
+# PROGRAM OUTPUTS
+frames_output = [] #generates a list of each array of hex values
+frame_color = {"#FFFFFF":"WHITE", "#000000":"BLACK"}   #dictionary that associates each hex value with a color name
 
+# CAPTURE VIDEO WITH CV2
+vidcap = cv2.VideoCapture(video_path)
+# store each frame in a folder as a jpeg
 if not vidcap.isOpened():
-    print("BAD FILE :(")
+    print("BAD FILE :-(")
 else:
-    success,image = vidcap.read()
+    success,frame = vidcap.read()
     # determine how many frames to capture and set
     if not success:
-        print("BAD FRAMES :(")
+        print("BAD FRAMES :-(")
     else: 
         # find total frames / seconds
         total_frames = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
         default_fps = vidcap.get(cv2.CAP_PROP_FPS)
+        print(f"default number of frames: {total_frames}, default fps: {default_fps}")
         total_seconds = total_frames / default_fps
-
         calc_fps = num_frames / total_seconds
+        print(f"TEST: {total_frames/num_frames}")
 
-        # turn each frame into a jpg image
+        # read each frame
+        frame_count = int(total_frames/num_frames)
+        saved_count = 0
         vidcap.set(cv2.CAP_PROP_FPS, calc_fps)
         while success:
-            cv2.imwrite("frame%d.jpg" % count, image)     # save frame as JPEG file      
-            success,image = vidcap.read()
-            print('Read a new frame: ', success)
-            count += 1
+            if(frame_count == int(total_frames/num_frames)):
+                # Construct the output file name
+                output_path = os.path.join("./frames", f"frame_{saved_count:04d}.jpg")
+                # Save the frame as an image
+                cv2.imwrite(f"./frames/frame_{saved_count:04d}.jpg", frame) 
+                print('Read a new frame: ', success) 
+                saved_count += 1
+                frame_count = 0
+
+            success,frame = vidcap.read()
+            frame_count += 1
         vidcap.release()
