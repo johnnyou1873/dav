@@ -4,7 +4,7 @@ VIDEO TO HEX CONVERTER
    for use in a VGA controlled by an FPGA
 """
 import cv2
-from pillow import Image, ImageOps
+from PIL import Image, ImageOps
 import numpy as np
 
 # PROGRAM VARS
