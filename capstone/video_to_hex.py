@@ -4,8 +4,8 @@ VIDEO TO HEX CONVERTER
    for use in a VGA controlled by an FPGA
 """
 import cv2
-import os
-from PIL import Image
+from pillow import Image, ImageOps
+import numpy as np
 
 # PROGRAM VARS
 # number of visible pixels per horizontal line: 640
@@ -62,16 +62,36 @@ else:
 # INTERPRET IMAGES WITH PILLOW
 # turn each frame in ./frames into an array of hex values
 
-for filename in os.listdir("./frames"):
-    if filename.lower().endswith(('.jpg', '.jpeg')):
-        file_path = os.path.join("./frames", filename)
-        try:
-            img = Image.open(file_path)
-            # Perform operations on the image here, e.g.,
-            # img.show()
-            # img.save("new_location/modified_" + filename)
-            print(f"Processed: {filename}")
-            img.close()
-        except Exception as e:
-            print(f"Error processing {filename}: {e}")
+# create function to get path to each frame
+def get_next_path(num):
+    place = 3
+    num_adjusted = "0000"
+    while(num != 0):
+        num_adjusted[place] = num%10
+        place -= 1
+        num /= 10
+    path = f"capstone/frames/frame_"+num_adjusted+".jpg"
+    return path
 
+for i in range (0, num_frames + 1):
+    path = get_next_path(i)
+    image_path = "your_image.jpg"  # Replace with your image path
+    try:
+        image = Image.open(image_path)
+
+        image = image.resize((pix_width, pix_height))
+        image = image.convert("RGB")
+
+        pixels = image.getdata()
+        hex_array = []
+
+        for pixel in pixels:
+            r, g, b = pixel
+            hex_color = f'#{r:02x}{g:02x}{b:02x}'
+            hex_array.append(hex_color)
+
+
+        print(f"Frame{i}: ", hex_array)
+    except FileNotFoundError:
+        print(f"Error: Image not found at {image_path}")
+        break
