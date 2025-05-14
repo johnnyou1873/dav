@@ -5,6 +5,7 @@ VIDEO TO HEX CONVERTER
 """
 import cv2
 import os
+from PIL import Image
 
 # PROGRAM VARS
 # number of visible pixels per horizontal line: 640
@@ -17,8 +18,9 @@ pix_height = 0      # number of pixels tall per frame
 num_colors = 0      # number of colors over all frames
 
 # PROGRAM OUTPUTS
-frames_output = [] #generates a list of each array of hex values
-frame_color = {"#FFFFFF":"WHITE", "#000000":"BLACK"}   #dictionary that associates each hex value with a color name
+frames_output = []                                      #generates a list of each array of hex values
+frame_color = {"#FFFFFF":"WHITE", "#000000":"BLACK"}    #dictionary that associates each hex value with a color name
+new_fps = 0                                             #indicates new fps for fpga to use
 
 # CAPTURE VIDEO WITH CV2
 vidcap = cv2.VideoCapture(video_path)
@@ -36,13 +38,13 @@ else:
         default_fps = vidcap.get(cv2.CAP_PROP_FPS)
         print(f"default number of frames: {total_frames}, default fps: {default_fps}")
         total_seconds = total_frames / default_fps
-        calc_fps = num_frames / total_seconds
+        new_fps = num_frames / total_seconds
         print(f"TEST: {total_frames/num_frames}")
 
         # read each frame
         frame_count = int(total_frames/num_frames)
         saved_count = 0
-        vidcap.set(cv2.CAP_PROP_FPS, calc_fps)
+        vidcap.set(cv2.CAP_PROP_FPS, new_fps)
         while success:
             if(frame_count == int(total_frames/num_frames)):
                 # Construct the output file name
@@ -56,3 +58,20 @@ else:
             success,frame = vidcap.read()
             frame_count += 1
         vidcap.release()
+
+# INTERPRET IMAGES WITH PILLOW
+# turn each frame in ./frames into an array of hex values
+
+for filename in os.listdir("./frames"):
+    if filename.lower().endswith(('.jpg', '.jpeg')):
+        file_path = os.path.join("./frames", filename)
+        try:
+            img = Image.open(file_path)
+            # Perform operations on the image here, e.g.,
+            # img.show()
+            # img.save("new_location/modified_" + filename)
+            print(f"Processed: {filename}")
+            img.close()
+        except Exception as e:
+            print(f"Error processing {filename}: {e}")
+
