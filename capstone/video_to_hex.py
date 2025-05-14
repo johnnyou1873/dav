@@ -5,6 +5,7 @@ VIDEO TO HEX CONVERTER
 """
 import cv2
 from PIL import Image, ImageOps
+import os
 import numpy as np
 
 # PROGRAM VARS
@@ -74,8 +75,7 @@ def get_next_path(num):
     return path
 
 for i in range (0, num_frames + 1):
-    path = get_next_path(i)
-    image_path = "your_image.jpg"  # Replace with your image path
+    image_path = get_next_path(i)
     try:
         image = Image.open(image_path)
 
