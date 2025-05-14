@@ -14,9 +14,8 @@ import numpy as np
 # aspect ratio: 4:3
 video_path = "bad_appleMV.mp4"     # path to directory of mp4 file
 num_frames = 10      # number of desired frames
-pix_width = 0       # number of pixels wide per frame 
-pix_height = 0      # number of pixels tall per frame 
-num_colors = 0      # number of colors over all frames
+pix_width = 120       # number of pixels wide per frame 
+pix_height = 160      # number of pixels tall per frame 
 
 # PROGRAM OUTPUTS
 frames_output = []                                      #generates a list of each array of hex values
@@ -65,17 +64,13 @@ else:
 
 # create function to get path to each frame
 def get_next_path(num):
-    place = 3
-    num_adjusted = "0000"
-    while(num != 0):
-        num_adjusted[place] = num%10
-        place -= 1
-        num /= 10
-    path = f"capstone/frames/frame_"+num_adjusted+".jpg"
+    num_str = f"{num:04d}"  # zero-pads the number to 4 digits
+    path = f"./frames/frame_{num_str}.jpg"
     return path
 
 for i in range (0, num_frames + 1):
     image_path = get_next_path(i)
+    print(os.path.exists(image_path))
     try:
         image = Image.open(image_path)
 
@@ -85,13 +80,23 @@ for i in range (0, num_frames + 1):
         pixels = image.getdata()
         hex_array = []
 
+        # turn into hex values
         for pixel in pixels:
             r, g, b = pixel
             hex_color = f'#{r:02x}{g:02x}{b:02x}'
-            hex_array.append(hex_color)
-
-
+            if hex_color != "#000000":
+                hex_array.append(1)
+            else:
+                hex_array.append(0)
         print(f"Frame{i}: ", hex_array)
+        frames_output.append(hex_array)
+        
     except FileNotFoundError:
         print(f"Error: Image not found at {image_path}")
         break
+
+    with open("./hex_frames.csv", "w") as file:
+        file.truncate(0)  # Truncate the file, effectively clearing its content
+        file.write(f"FRAME NUMBER, HEX VALUES\n")
+        for i in range(0,len(frames_output)):
+                file.write(f"{i}, {frames_output[i]}\n")
