@@ -119,6 +119,8 @@ with open("./hex_frames.csv", "w") as file:
     file.write(f"FRAME NUMBER, HEX VALUE\n")
     file.write(str(hex_frames_output))
 
+print(bit_frames_output[165])
+
 print("Program Success!!!!")
 print(f"NUM OF HEX VALS PER FRAME: {len(hex_frames_output[0])}")
 print(f"NUM FRAMES: {len(hex_frames_output)}")
