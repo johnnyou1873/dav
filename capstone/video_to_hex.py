@@ -13,9 +13,9 @@ import numpy as np
 # number of visible horizontal lines per frame: 480
 # aspect ratio: 4:3
 video_path = "bad_appleMV.mp4"     # path to directory of mp4 file
-num_frames = 10      # number of desired frames
-pix_width = 120       # number of pixels wide per frame 
-pix_height = 160      # number of pixels tall per frame 
+num_frames = 3285      # number of desired frames
+pix_width = 64       # number of pixels wide per frame 
+pix_height = 48      # number of pixels tall per frame 
 
 # PROGRAM OUTPUTS
 bit_frames_output = []                                      #generates a list of each array of bit values
@@ -40,7 +40,7 @@ else:
         print(f"default number of frames: {total_frames}, default fps: {default_fps}")
         total_seconds = total_frames / default_fps
         new_fps = num_frames / total_seconds
-        #print(f"TEST: {total_frames/num_frames}")
+        print(f"Total Seconds: {total_seconds}")
 
         # read each frame
         frame_count = int(total_frames/num_frames)
@@ -118,3 +118,8 @@ with open("./hex_frames.csv", "w") as file:
     file.truncate(0)  # Truncate the file, effectively clearing its content
     file.write(f"FRAME NUMBER, HEX VALUE\n")
     file.write(str(hex_frames_output))
+
+print("Program Success!!!!")
+print(f"NUM OF HEX VALS PER FRAME: {len(hex_frames_output[0])}")
+print(f"NUM FRAMES: {len(hex_frames_output)}")
+print(f"SECONDS PER FRAME: {1/new_fps}")
