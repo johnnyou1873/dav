@@ -39,7 +39,7 @@ else:
         print(f"default number of frames: {total_frames}, default fps: {default_fps}")
         total_seconds = total_frames / default_fps
         new_fps = num_frames / total_seconds
-        print(f"TEST: {total_frames/num_frames}")
+        #print(f"TEST: {total_frames/num_frames}")
 
         # read each frame
         frame_count = int(total_frames/num_frames)
