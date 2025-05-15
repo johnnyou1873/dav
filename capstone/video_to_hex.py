@@ -52,7 +52,7 @@ else:
                 output_path = os.path.join("./frames", f"frame_{saved_count:04d}.jpg")
                 # Save the frame as an image
                 cv2.imwrite(f"./frames/frame_{saved_count:04d}.jpg", frame) 
-                print('Read a new frame: ', success) 
+                #print('Read a new frame: ', success) 
                 saved_count += 1
                 frame_count = 0
 
@@ -71,7 +71,7 @@ def get_next_path(num):
 
 for i in range (0, num_frames + 1):
     image_path = get_next_path(i)
-    print(os.path.exists(image_path))
+    #print(os.path.exists(image_path))
     try:
         image = Image.open(image_path)
 
@@ -117,11 +117,15 @@ for frame_array in bit_frames_output:
 with open("./hex_frames.csv", "w") as file:
     file.truncate(0)  # Truncate the file, effectively clearing its content
     file.write(f"FRAME NUMBER, HEX VALUE\n")
-    file.write(str(hex_frames_output))
+    file.write(str(bit_frames_output))
 
-print(bit_frames_output[165])
+#print(bit_frames_output[165])
+print(bit_frames_output[185])
+print(bit_frames_output[205])
+print(bit_frames_output[225])
 
 print("Program Success!!!!")
 print(f"NUM OF HEX VALS PER FRAME: {len(hex_frames_output[0])}")
+print(f"NUM OF BIT VALS PER FRAME: {len(bit_frames_output[0])}")
 print(f"NUM FRAMES: {len(hex_frames_output)}")
 print(f"SECONDS PER FRAME: {1/new_fps}")
