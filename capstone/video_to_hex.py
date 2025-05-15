@@ -18,7 +18,8 @@ pix_width = 120       # number of pixels wide per frame
 pix_height = 160      # number of pixels tall per frame 
 
 # PROGRAM OUTPUTS
-frames_output = []                                      #generates a list of each array of hex values
+bit_frames_output = []                                      #generates a list of each array of bit values
+hex_frames_output = []                                      # generates a list of each frame as a hex string
 frame_color = {"#FFFFFF":"WHITE", "#000000":"BLACK"}    #dictionary that associates each hex value with a color name
 new_fps = 0                                             #indicates new fps for fpga to use
 
@@ -88,15 +89,32 @@ for i in range (0, num_frames + 1):
                 hex_array.append(1)
             else:
                 hex_array.append(0)
-        print(f"Frame{i}: ", hex_array)
-        frames_output.append(hex_array)
+        #print(f"Frame{i}: ", hex_array)
+        bit_frames_output.append(hex_array)
         
     except FileNotFoundError:
         print(f"Error: Image not found at {image_path}")
         break
 
-    with open("./hex_frames.csv", "w") as file:
-        file.truncate(0)  # Truncate the file, effectively clearing its content
-        file.write(f"FRAME NUMBER, HEX VALUES\n")
-        for i in range(0,len(frames_output)):
-                file.write(f"{i}, {frames_output[i]}\n")
+# convert values to hex
+for frame_array in bit_frames_output:
+    #get bit string that is a multiple of 4
+    bit_string = ""
+    for bit in frame_array:
+        bit_string += str(bit)
+    if(len(bit_string) %4 != 0):
+        bit_string += f"{0:0{bit_string%4}d}"
+        print("Added extra bits at ends pls ignore :( - ", bit_string%4, "bits")
+
+    hex_string = ""
+    for i in range(0, len(bit_string), 4):
+        chunk = bit_string[i:i+4]              #single hex value
+        decimal_value = int(chunk, 2)
+        hex_string += hex(decimal_value)[2:].upper()  # [2:] removes "0x" prefix
+    hex_frames_output.append(hex_string)
+
+    
+with open("./hex_frames.csv", "w") as file:
+    file.truncate(0)  # Truncate the file, effectively clearing its content
+    file.write(f"FRAME NUMBER, HEX VALUE\n")
+    file.write(str(hex_frames_output))
