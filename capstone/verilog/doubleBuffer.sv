@@ -9,8 +9,8 @@ module doubleBuffer(
 
 	localparam HPIXELS  = 640;    // number of visible pixels per horizontal line
 	localparam VPIXELS  = 480;    // number of visible horizontal lines per frame
-	localparam BLOCK_SIZE = 20;
-	localparam BUFFER_SIZE = (HPIXELS / 20) * (VPIXELS / 20);
+	localparam BLOCK_SIZE = 10;
+	localparam BUFFER_SIZE = (HPIXELS / BLOCK_SIZE) * (VPIXELS / BLOCK_SIZE);
 	
 	 logic read_buffer_select;
     logic [9:0] read_addr;
