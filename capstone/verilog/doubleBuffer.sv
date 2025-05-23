@@ -1,19 +1,19 @@
-module doubleBuffer(
-	input logic clk,
-	input logic [9:0] hc,
-	input logic [9:0] vc,
-	input logic [9:0] write_addr,
-	input logic [7:0] pixel_data_in,
-	output logic [7:0] pixel_data_out
+module doubleBuffer #(
+    parameter HPIXELS    = 640,    // number of visible pixels per horizontal line
+    parameter VPIXELS    = 480,    // number of visible horizontal lines per frame
+    parameter BLOCK_SIZE = 16,
+    parameter BUFFER_SIZE = (HPIXELS / BLOCK_SIZE) * (VPIXELS / BLOCK_SIZE)
+)(
+    input  logic        clk,
+    input  logic [9:0]  hc,
+    input  logic [9:0]  vc,
+    input  logic [9:0]  write_addr,
+    input  logic [7:0]  pixel_data_in,
+    output logic [7:0]  pixel_data_out
 );
 
-	localparam HPIXELS  = 640;    // number of visible pixels per horizontal line
-	localparam VPIXELS  = 480;    // number of visible horizontal lines per frame
-	localparam BLOCK_SIZE = 10;
-	localparam BUFFER_SIZE = (HPIXELS / BLOCK_SIZE) * (VPIXELS / BLOCK_SIZE);
-	
-	 logic read_buffer_select;
-    logic [9:0] read_addr;
+    logic read_buffer_select;
+    logic [$clog2(BUFFER_SIZE)-1:0] read_addr;
 	 
 //	logic [7:0] buffer [0:1] [0:BUFFER_SIZE-1];
 //

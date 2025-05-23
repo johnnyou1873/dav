@@ -36,6 +36,9 @@ module vga(
 	localparam VSPULSE  = 2;    // length (in pixels) of vsync pulse
 	localparam VBP      = 33;    // length (in pixels) of vertical back porch
 	
+	localparam HTOTAL = HPIXELS + HFP + HSPULSE + HBP;
+	localparam VTOTAL = VPIXELS + VFP + VSPULSE + VBP;
+	
 	/* no need to mess with this -- this is a basic sanity check that will
 	 * cause the compiler to yell at you if the values above don't add up
 	 */
@@ -70,14 +73,15 @@ module vga(
 		if (rst) begin
 			hc <= 0;
 			vc <= 0;
-		end else if (hc < HPIXELS + HFP + HSPULSE + HBP) begin
+		end else if (hc == HTOTAL - 1) begin // last column
+			hc <= 0;
+			if (vc == VTOTAL - 1) begin // last line
+				vc <= 0;
+			end else begin // advance to next line
+				vc <= vc + 1;
+			end
+		end else begin // advance to next column
 			hc <= hc + 1;
-		end else if (vc < VPIXELS + VFP + VSPULSE + VBP) begin
-			hc <= 0;
-			vc <= vc + 1;
-		end else begin
-			hc <= 0;
-			vc <= 0;
 		end
 	end
 	
