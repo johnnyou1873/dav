@@ -4,24 +4,26 @@
 module clockDivider #(
 	parameter BASE_SPEED = 50000000
 )(
-	input clockIn,
-	input [19:0] speed,
-	input reset,
-	output logic clockOut
+	input clk,
+	input rst,
+	input [19:0] freq,
+	output logic clk0
 );
 	
-	logic [31:0] counter;
+	logic [31:0] counter = 0;
 	
-	always @(posedge clockIn) begin
-		if (speed == 0) begin
-			counter <= counter;
-			clockOut <= 0;
-		end else if (reset) begin
+	initial begin
+		clk0 = 0;
+	end
+	
+	always @(posedge clk) begin
+		if (rst || freq == 0) begin
 			counter <= 0;
-		end else if (counter >= (BASE_SPEED / (speed * 2))) begin
+			clk0 <= 0;
+		end else if (counter >= (BASE_SPEED / (freq * 2))) begin
 			// The clock should be toggled here instead of in a separate always_comb block to prevent a level-sensitive comparison
-			clockOut <= ~clockOut;
 			counter <= 0;
+			clk0 <= ~clk0;
 		end else begin
 			counter <= counter + 1;
 		end

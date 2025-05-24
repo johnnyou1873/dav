@@ -65,7 +65,7 @@ module vga(
 	assign vc_out = vc;
 	
    // in the sequential block, we update hc and vc based on their current values
-	always_ff @(posedge vgaclk) begin
+	always_ff @(posedge vgaclk or posedge rst) begin
 		/* TODO(2): update the counters, paying careful attention to
             a) the reset condition, and
             b) the conditions that cause hc and vc to go back to 0

@@ -1,6 +1,6 @@
 module buzzerSong (
-	input logic clock,
-	input logic reset,
+	input logic clk,
+	input logic rst,
 	output logic [7:0] out     // now 8-bit amplitude
 );
 
@@ -8,8 +8,8 @@ logic [19:0] frequency = 0;
 logic timingClockOut;
 logic [19:0] tempo = 15; // should be 32-nd beats per second
 
-sineGenerator sineGenerator (.clockIn(clock), .speed(frequency), .reset(reset), .out(out));
-clockDivider timingClock (.clockIn(clock), .speed(tempo), .reset(reset), .clockOut(timingClockOut));
+sineGenerator sineGenerator (.clk(clk), .rst(rst), .freq(frequency), .out(out));
+clockDivider timingClock (.clk(clk), .rst(rst), .freq(tempo), .clk0(timingClockOut));
 
 /* 
   Never Gonna Give you Up

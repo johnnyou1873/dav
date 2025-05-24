@@ -1,6 +1,8 @@
 module vga_top(
 	input clk,
 	input button,
+	input sw [0:9],
+	output logic leds [0:9],
    output logic VGA_hsync,
 	output logic VGA_vsync,
    output logic [3:0] VGA_red,
@@ -11,9 +13,9 @@ module vga_top(
 );
 
 	localparam HPIXELS  = 640;    // number of visible pixels per horizontal line
-   localparam VPIXELS  = 480;    // number of visible horizontal lines per frame
-   localparam BLOCK_SIZE = 16;
-   localparam BUFFER_SIZE = (HPIXELS / BLOCK_SIZE) * (VPIXELS / BLOCK_SIZE);
+	localparam VPIXELS  = 480;    // number of visible horizontal lines per frame
+	localparam BLOCK_SIZE = 16;
+	localparam BUFFER_SIZE = (HPIXELS / BLOCK_SIZE) * (VPIXELS / BLOCK_SIZE);
 
 	logic pllclk;
 	logic rst;
@@ -53,12 +55,12 @@ module vga_top(
 	localparam RED = 8'he0;
 	localparam BLU = 8'h03;
 	
-	localparam NUM_FRAMES = 3286;
+	localparam NUM_FRAMES = 2608;
 	
 	logic [0:BUFFER_SIZE-1] frame;
 	logic sprite_bit;
 	logic [$clog2(NUM_FRAMES)-1:0] frame_num;
-	logic [2:0] clock_div = 0;
+	logic [2:0] clock_div = 0; // resulting fps == 11.9047619 fps
 	
 	displayEncoder displayEncoder (.digits(frame_num), .shutdown(), .displayBits(displayBits));
 	
@@ -73,6 +75,15 @@ module vga_top(
 		.frame_num(frame_num),
 		.frame(frame)
 	);
+	
+	logic play = 0;
+	logic voice_en [0:4];
+	assign voice_en = sw[0:4];
+	
+	midiSong midiSong (.clk(clk), .rst(rst), .play(play), .en(voice_en), .out(DAC_bus));
+
+	assign leds = sw;
+	
 	logic [5:0] xpos;
 	logic [5:0] ypos;
 	
@@ -112,13 +123,12 @@ module vga_top(
 	end
 	
 	always_ff @(posedge VGA_vsync) begin
-		if (clock_div == 5) begin
+		if (clock_div == 4) begin
 			clock_div <= 0;
 		end else begin
 			clock_div <= clock_div + 1;
 		end
+		play <= (frame_num > 183);
 	end
-	
-	buzzerSong buzzerSong(.clock(clk), .reset(rst), .out(DAC_bus));
 	
 endmodule

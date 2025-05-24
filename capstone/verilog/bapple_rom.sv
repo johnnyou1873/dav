@@ -11,8 +11,8 @@ module bapple_rom #(
 	output logic [$clog2(NUM_FRAMES)-1:0] frame_num
 );
 	
-	localparam NUM_FRAMES = 3286;
-   localparam RLE_DEPTH = 185215;
+	localparam NUM_FRAMES = 2608;
+   localparam RLE_DEPTH = 220439;
 	localparam RLE_WIDTH = 6;
 
    logic [0:BUFFER_SIZE-1] buf0, buf1;
