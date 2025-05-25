@@ -13,9 +13,9 @@ import numpy as np
 # number of visible horizontal lines per frame: 480
 # aspect ratio: 4:3
 video_path = "bad_appleMV.mp4"     # path to directory of mp4 file
-num_frames = 3285      # number of desired frames
-pix_width = 64       # number of pixels wide per frame 
-pix_height = 48      # number of pixels tall per frame 
+num_frames = 2586      # number of desired frames
+pix_width = 40       # number of pixels wide per frame 
+pix_height = 30      # number of pixels tall per frame 
 
 # PROGRAM OUTPUTS
 bit_frames_output = []                                      #generates a list of each array of bit values

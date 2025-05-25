@@ -54,7 +54,9 @@ for bins in flatvals:
     else:
       continue
 print(bin_hash)
-print("TOTAL BITS IN DICT: " + num_bits)
+for val in bin_hash:
+   print(f" lut[{bin_hash[val]}] = 11'b{val};")
+print("TOTAL BITS IN DICT: " + str(num_bits))
 print("")
 hashed_vals = []
 for val in vals:
@@ -66,8 +68,8 @@ for val in vals:
 
 with open("./juicy_data.csv", "w") as file:
     file.truncate(0)  # Truncate the file, effectively clearing its content
-    for nums in hashed_vals:
-       file.write(str(nums)+'\n')
+    for num in list(itertools.chain.from_iterable(hashed_vals)):
+     file.write(str(num)+'\n')
     #file.write(str(vals))
     #for tup in flattend_data:
        #file.write(tup_to_binary(tup)+'\n')
