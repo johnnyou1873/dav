@@ -18,6 +18,7 @@ module midiSong #(
 	
 	logic [11:0] counter [0:4];
 	logic [7:0] tone [0:4];
+	logic [7:0] harmonic [0:7];
 	logic [31:0] millis;
 	logic millisClk;
 	
@@ -26,21 +27,32 @@ module midiSong #(
 	localparam OUTW = 8;
 
 	// Compute full‐width sum and do some mixing
-	wire [W+1:0] sum = 
-		((en[0] ? tone[0]: '0) +
-		(en[1] ? tone[1]: '0) +
+//	wire [W+1:0] sum = 
+//		((en[0] ? tone[0] : '0) +
+//		(en[1] ? tone[1] : '0) +
+//		(en[2] ? (tone[2] >> 2) : '0) +
+//		(en[3] ? (tone[3] >> 2) : '0) +
+//		(en[4] ? (tone[4] >> 2) : '0));
+	wire [W+1:0] sum = (
+		(en[0] ? tone[0] + (harmonic[0] >> 3) + (harmonic[1] >> 3) + (harmonic[2] >> 3) + (harmonic[3] >> 4): '0) +
+		(en[1] ? tone[1] + (harmonic[4] >> 3) + (harmonic[5] >> 3) + (harmonic[6] >> 3) + (harmonic[7] >> 4): '0) +
 		(en[2] ? (tone[2] >> 2) : '0) +
 		(en[3] ? (tone[3] >> 2) : '0) +
-		(en[4] ? (tone[4] >> 2) : '0));
+		(en[4] ? (tone[4] >> 2) : '0)
+	);
 
 	// sum/3 using (sum * 85) >> 8 (since 85/256 = 1/3 exactly for 8-bits)
-	wire [W+1:0] avg = (sum * 85) >> 8;
+//	wire [W+1:0] avg = (sum * 85) >> 8;
+	wire [W+1:0] avg = sum >> 2;
+	
+	always @(posedge clk) begin // use a sequential block to ensure DAC does not get intermediate values
+		// if avg is bigger than max, clamp it
+		out <= (avg >= { {(OUTW){1'b1}} }) ?
+									{ {(OUTW){1'b1}} } :
+									avg[OUTW-1:0];
+	end
 
-	// if avg is bigger than max, clamp it
-	assign out = (avg >= { {(OUTW){1'b1}} }) ?
-								{ {(OUTW){1'b1}} } :
-								avg[OUTW-1:0];
-
+	// MAIN
 	sineGenerator #(.BASE_SPEED(BASE_SPEED)) voice0 (.clk(clk), .rst(rst), .freq(freq[0]), .out(tone[0]));
 	sineGenerator #(.BASE_SPEED(BASE_SPEED)) voice1 (.clk(clk), .rst(rst), .freq(freq[1]), .out(tone[1]));
 	sawtoothGenerator #(.BASE_SPEED(BASE_SPEED)) voice2 (.clk(clk), .rst(rst), .freq(freq[2]), .out(tone[2]));
@@ -48,7 +60,19 @@ module midiSong #(
 	clockDivider #(.BASE_SPEED(BASE_SPEED)) voice3 (.clk(clk), .rst(rst), .freq(freq[3]), .clk0(tone3_clk));
 	assign tone[3] = tone3_clk ? 8'hFF : 8'h00;
 	noiseGenerator #(.BASE_SPEED(BASE_SPEED)) voice4 (.clk(clk), .rst(rst), .freq(freq[4]), .out(tone[4]));
-	clockDivider millisClock (.clk(clk), .rst(rst || ~play), .freq(1000), .clk0(millisClk)); // slow down millis due to framerate error
+	
+	clockDivider millisClock (.clk(clk), .rst(rst || ~play), .freq(1000), .clk0(millisClk));
+	
+	// HARMONICS
+	sineGenerator #(.BASE_SPEED(BASE_SPEED)) harmonic0_0 (.clk(clk), .rst(rst), .freq(freq[0] * 2), .out(harmonic[0]));
+	sineGenerator #(.BASE_SPEED(BASE_SPEED)) harmonic0_1 (.clk(clk), .rst(rst), .freq(freq[0] * 3), .out(harmonic[1]));
+	sineGenerator #(.BASE_SPEED(BASE_SPEED)) harmonic0_2 (.clk(clk), .rst(rst), .freq(freq[0] * 4), .out(harmonic[2]));
+	sineGenerator #(.BASE_SPEED(BASE_SPEED)) harmonic0_3 (.clk(clk), .rst(rst), .freq(freq[0] * 5), .out(harmonic[3]));
+	sineGenerator #(.BASE_SPEED(BASE_SPEED)) harmonic1_0 (.clk(clk), .rst(rst), .freq(freq[1] * 2), .out(harmonic[4]));
+	sineGenerator #(.BASE_SPEED(BASE_SPEED)) harmonic1_1 (.clk(clk), .rst(rst), .freq(freq[1] * 3), .out(harmonic[5]));
+	sineGenerator #(.BASE_SPEED(BASE_SPEED)) harmonic1_2 (.clk(clk), .rst(rst), .freq(freq[1] * 4), .out(harmonic[6]));
+	sineGenerator #(.BASE_SPEED(BASE_SPEED)) harmonic1_3 (.clk(clk), .rst(rst), .freq(freq[1] * 5), .out(harmonic[7]));
+	
 	
 	always @(posedge millisClk or posedge rst or negedge play) begin
 		if (rst || ~play) begin
@@ -57,7 +81,7 @@ module midiSong #(
 				counter[i] <= 0;
 			end
 		end else begin
-			millis <= millis + 1; // purposefully overflow
+			millis <= millis + 1;
 			// Voice 0 (melody 1)
 			if (counter[0] < $size(d1)-1 && millis == d1[counter[0]+1]) begin
 				counter[0] <= counter[0] + 1;
